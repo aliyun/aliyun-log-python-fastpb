@@ -1,0 +1,5 @@
+# Development and testing dependencies
+pytest>=7.0.0
+pytest-benchmark>=4.0.0
+protobuf>=4.0.0
+maturin>=1.0.0
