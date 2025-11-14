@@ -290,7 +290,7 @@ impl<'a> MessageWrite for LogGroupRaw<'a> {
     }
 }
 
-#[allow(clippy::derive_partial_eq_without_eq)]
+#[allow(clippy::derive_partial_eq_without_eq, dead_code)]
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct LogGroupList<'a> {
     pub log_groups: Vec<proto::LogGroup<'a>>,
@@ -322,7 +322,7 @@ impl<'a> MessageWrite for LogGroupList<'a> {
     }
 }
 
-#[allow(clippy::derive_partial_eq_without_eq)]
+#[allow(clippy::derive_partial_eq_without_eq, dead_code)]
 #[derive(Debug, Default, PartialEq, Clone)]
 pub struct LogGroupListRaw<'a> {
     pub log_groups: Vec<proto::LogGroupRaw<'a>>,
