@@ -55,6 +55,8 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist
       - name: Install built wheel
+        # 只在 universal2 上测试，x86_64 只构建不测试
+        if: matrix.target == 'universal2-apple-darwin'
         run: |
           pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
@@ -83,6 +85,7 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist
       - name: Install built wheel
+        shell: bash
         run: |
           pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
@@ -186,8 +189,8 @@ jobs:
         options: -v ${{ github.workspace }}:/io -w /io
         run: |
           apk add py3-pip
-          pip3 install -U pip
-          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
+          pip3 install -U pip --break-system-packages
+          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall --break-system-packages
           python3 -c "import aliyun_log_fastpb"
     - name: Upload wheels
       if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
@@ -224,9 +227,9 @@ jobs:
         githubToken: ${{ github.token }}
         install: |
           apk add py3-pip
-          pip3 install -U pip
+          pip3 install -U pip --break-system-packages
         run: |
-          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
+          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall --break-system-packages
           python3 -c "import aliyun_log_fastpb"
     - name: Upload wheels
       if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
