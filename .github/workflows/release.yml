@@ -25,8 +25,9 @@ jobs:
           args: --release --out dist --sdist
       - name: Install built wheel - x86_64
         run: |
-          pip install aliyun-log-fastpb --no-index --find-links dist --force-reinstall
+          pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
+          rm -rf dist
       - name: Build wheels - universal2
         uses: PyO3/maturin-action@v1
         with:
@@ -34,8 +35,9 @@ jobs:
           args: --release --out dist
       - name: Install built wheel - universal2
         run: |
-          pip install aliyun-log-fastpb --no-index --find-links dist --force-reinstall
+          pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
+          rm -rf dist
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -61,8 +63,9 @@ jobs:
           args: --release --out dist
       - name: Install built wheel
         run: |
-          pip install aliyun-log-fastpb --no-index --find-links dist --force-reinstall
+          pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
+          rm -rf dist
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -89,8 +92,9 @@ jobs:
     - name: Install built wheel
       if: matrix.target == 'x86_64'
       run: |
-        pip install aliyun-log-fastpb --no-index --find-links dist --force-reinstall
+        pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
         python -c "import aliyun_log_fastpb"
+        rm -rf dist
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
@@ -125,8 +129,9 @@ jobs:
           apt-get install -y --no-install-recommends python3 python3-pip
           pip3 install -U pip
         run: |
-          pip3 install aliyun-log-fastpb --no-index --find-links dist/ --force-reinstall
+          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python3 -c "import aliyun_log_fastpb"
+          rm -rf dist
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
@@ -161,8 +166,9 @@ jobs:
         run: |
           apk add py3-pip
           pip3 install -U pip
-          pip3 install aliyun-log-fastpb --no-index --find-links /io/dist/ --force-reinstall
+          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python3 -c "import aliyun_log_fastpb"
+          rm -rf dist
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
@@ -199,8 +205,9 @@ jobs:
           apk add py3-pip
           pip3 install -U pip
         run: |
-          pip3 install aliyun-log-fastpb --no-index --find-links dist/ --force-reinstall
+          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python3 -c "import aliyun_log_fastpb"
+          rm -rf dist
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
