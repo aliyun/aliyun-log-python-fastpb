@@ -1,5 +1,7 @@
 # aliyun-log-fastpb
 
+[![Test](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml/badge.svg)](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml)
+
 [English](README.md) | 中文文档
 
 基于 PyO3 和 quick-protobuf 的阿里云日志高性能 protobuf 序列化库。

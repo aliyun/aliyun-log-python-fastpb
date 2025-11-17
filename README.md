@@ -2,6 +2,8 @@
 
 [中文文档](README_CN.md) | English
 
+[![Test](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml/badge.svg)](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml)
+
 Fast protobuf serialization for Aliyun Log using PyO3 and quick-protobuf.
 
 ## Installation
