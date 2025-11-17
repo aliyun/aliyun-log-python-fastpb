@@ -222,7 +222,7 @@ jobs:
         with:
           arch: ${{ matrix.platform.arch }}
           distro: alpine_latest
-          githubToken: ${{ github.token }}
+          # githubToken: ${{ github.token }}
           install: |
             apk add py3-pip
             pip3 install -U pip --break-system-packages
@@ -272,7 +272,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: dist/aliyun_log_fastpb-*.tar.gz
           tag_name: ${{ github.event.inputs.draft_version != '' && github.event.inputs.draft_version || github.ref_name }}
           draft: ${{ github.event.inputs.draft_version != '' }}
           prerelease: false
