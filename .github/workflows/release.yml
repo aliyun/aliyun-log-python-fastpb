@@ -5,8 +5,8 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      upload-artifacts:
-        description: '是否上传构建产物 (Upload artifacts)'
+      draft:
+        description: '是否是草稿版本 Release (Create draft release)'
         required: false
         default: 'false'
         type: choice
@@ -15,7 +15,7 @@ on:
           - 'false'
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: '3.12'
 
 jobs:
   sdist:
@@ -31,11 +31,11 @@ jobs:
           command: sdist
           args: --out dist
       - name: Upload sdist
-        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wheels-sdist
           path: dist
+          overwrite: true
 
   macos:
     runs-on: macos-latest
@@ -61,11 +61,11 @@ jobs:
           pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
       - name: Upload wheels
-        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wheels-macos-${{ matrix.target }}
           path: dist
+          overwrite: true
 
   windows:
     runs-on: windows-latest
@@ -90,11 +90,11 @@ jobs:
           pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
           python -c "import aliyun_log_fastpb"
       - name: Upload wheels
-        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wheels-windows-${{ matrix.target }}
           path: dist
+          overwrite: true
 
   linux:
     runs-on: ubuntu-latest
@@ -102,28 +102,28 @@ jobs:
       matrix:
         target: [x86_64, i686]
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-python@v6
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        architecture: x64
-    - name: Build wheels
-      uses: PyO3/maturin-action@v1
-      with:
-        target: ${{ matrix.target }}
-        manylinux: auto
-        args: --release --out dist
-    - name: Install built wheel
-      if: matrix.target == 'x86_64'
-      run: |
-        pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
-        python -c "import aliyun_log_fastpb"
-    - name: Upload wheels
-      if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-linux-${{ matrix.target }}
-        path: dist
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: auto
+          args: --release --out dist
+      - name: Install built wheel
+        if: matrix.target == 'x86_64'
+        run: |
+          pip install dist/aliyun_log_fastpb-*.whl --force-reinstall
+          python -c "import aliyun_log_fastpb"
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.target }}
+          path: dist
+          overwrite: true
 
   linux-cross:
     runs-on: ubuntu-latest
@@ -131,36 +131,36 @@ jobs:
       matrix:
         target: [aarch64, armv7, s390x, ppc64le, ppc64]
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-python@v6
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    - name: Build wheels
-      uses: PyO3/maturin-action@v1
-      with:
-        target: ${{ matrix.target }}
-        manylinux: auto
-        args: --release --out dist
-    - uses: uraimo/run-on-arch-action@v3.0.1
-      if: matrix.target != 'ppc64'
-      name: Install built wheel
-      with:
-        arch: ${{ matrix.target }}
-        distro: ubuntu20.04
-        # githubToken: ${{ github.token }}
-        install: |
-          apt-get update
-          apt-get install -y --no-install-recommends python3 python3-pip
-          pip3 install -U pip
-        run: |
-          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
-          python3 -c "import aliyun_log_fastpb"
-    - name: Upload wheels
-      if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-linux-cross-${{ matrix.target }}
-        path: dist
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: auto
+          args: --release --out dist
+      - uses: uraimo/run-on-arch-action@v3.0.1
+        if: matrix.target != 'ppc64'
+        name: Install built wheel
+        with:
+          arch: ${{ matrix.target }}
+          distro: ubuntu20.04
+          # githubToken: ${{ github.token }}
+          install: |
+            apt-get update
+            apt-get install -y --no-install-recommends python3 python3-pip
+            pip3 install -U pip
+          run: |
+            pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall
+            python3 -c "import aliyun_log_fastpb"
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-cross-${{ matrix.target }}
+          path: dist
+          overwrite: true
 
   musllinux:
     runs-on: ubuntu-latest
@@ -170,34 +170,34 @@ jobs:
           - x86_64-unknown-linux-musl
           - i686-unknown-linux-musl
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-python@v6
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        architecture: x64
-    - name: Build wheels
-      uses: PyO3/maturin-action@v1
-      with:
-        target: ${{ matrix.target }}
-        manylinux: musllinux_1_2
-        args: --release --out dist
-    - name: Install built wheel
-      if: matrix.target == 'x86_64-unknown-linux-musl'
-      uses: addnab/docker-run-action@v3
-      with:
-        image: alpine:latest
-        options: -v ${{ github.workspace }}:/io -w /io
-        run: |
-          apk add py3-pip
-          pip3 install -U pip --break-system-packages
-          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall --break-system-packages
-          python3 -c "import aliyun_log_fastpb"
-    - name: Upload wheels
-      if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-musllinux-${{ matrix.target }}
-        path: dist
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: musllinux_1_2
+          args: --release --out dist
+      - name: Install built wheel
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: alpine:latest
+          options: -v ${{ github.workspace }}:/io -w /io
+          run: |
+            apk add py3-pip
+            pip3 install -U pip --break-system-packages
+            pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall --break-system-packages
+            python3 -c "import aliyun_log_fastpb"
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-musllinux-${{ matrix.target }}
+          path: dist
+          overwrite: true
 
   musllinux-cross:
     runs-on: ubuntu-latest
@@ -209,40 +209,59 @@ jobs:
           - target: armv7-unknown-linux-musleabihf
             arch: armv7
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-python@v6
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    - name: Build wheels
-      uses: PyO3/maturin-action@v1
-      with:
-        target: ${{ matrix.platform.target }}
-        manylinux: musllinux_1_2
-        args: --release --out dist
-    - uses: uraimo/run-on-arch-action@v3.0.1
-      name: Install built wheel
-      with:
-        arch: ${{ matrix.platform.arch }}
-        distro: alpine_latest
-        githubToken: ${{ github.token }}
-        install: |
-          apk add py3-pip
-          pip3 install -U pip --break-system-packages
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: musllinux_1_2
+          args: --release --out dist
+      - uses: uraimo/run-on-arch-action@v3.0.1
+        name: Install built wheel
+        with:
+          arch: ${{ matrix.platform.arch }}
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          install: |
+            apk add py3-pip
+            pip3 install -U pip --break-system-packages
+          run: |
+            pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall --break-system-packages
+            python3 -c "import aliyun_log_fastpb"
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-musllinux-cross-${{ matrix.platform.arch }}
+          path: dist
+          overwrite: true
+
+  pre-release:
+    name: Pre-Release Check
+    runs-on: ubuntu-latest
+    needs:
+      [sdist, macos, windows, linux, linux-cross, musllinux, musllinux-cross]
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+      - name: List all artifacts
         run: |
-          pip3 install dist/aliyun_log_fastpb-*.whl --force-reinstall --break-system-packages
-          python3 -c "import aliyun_log_fastpb"
-    - name: Upload wheels
-      if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.upload-artifacts == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-musllinux-cross-${{ matrix.platform.arch }}
-        path: dist
+          echo "=== All build artifacts ==="
+          ls -lh dist/
+          echo ""
+          echo "=== Total files: $(ls -1 dist/ | wc -l) ==="
 
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [ sdist, macos, windows, linux, linux-cross, musllinux, musllinux-cross ]
+    if: startsWith(github.ref, 'refs/tags/') || ${{ github.event.inputs.draft == 'true' }}
+    needs: [pre-release]
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -252,13 +271,16 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: List all files to be uploaded
-        run: |
-          ls -lh dist/
-          echo "---"
-          echo "Files to upload:"
-          ls dist/
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          prerelease: false
+          generate_release_notes: true
+          fail_on_unmatched_files: true
       - name: Publish to PyPI
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
