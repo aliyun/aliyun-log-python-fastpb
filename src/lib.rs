@@ -274,31 +274,35 @@ fn serialize_log_group_generic<G>(
 where
     G: ParseLogGroup<'static>,
 {
-    let log_items_obj = log_group_dict
-        .get_item("LogItems")
-        .map_err(|_| PyValueError::new_err("LogGroup missing 'LogItems' field"))?
-        .ok_or_else(|| PyValueError::new_err("LogGroup missing 'LogItems' field"))?;
-    let log_items_list = log_items_obj
-        .cast::<PyList>()
-        .map_err(|_| PyTypeError::new_err("LogItems must be a list"))?;
+    // Parse LogItems - if not present, default to empty list
+    let logs = if let Ok(Some(log_items_obj)) = log_group_dict.get_item("LogItems") {
+        let log_items_list = log_items_obj
+            .cast::<PyList>()
+            .map_err(|_| PyTypeError::new_err("LogItems must be a list"))?;
 
-    let mut logs = Vec::with_capacity(log_items_list.len());
-    for log_item in log_items_list.iter() {
-        logs.push(parse_log_generic::<G::LogType>(&log_item)?);
-    }
+        let mut logs = Vec::with_capacity(log_items_list.len());
+        for log_item in log_items_list.iter() {
+            logs.push(parse_log_generic::<G::LogType>(&log_item)?);
+        }
+        logs
+    } else {
+        Vec::new()
+    };
 
-    let log_tags_obj = log_group_dict
-        .get_item("LogTags")
-        .map_err(|_| PyValueError::new_err("LogGroup missing 'LogTags' field"))?
-        .ok_or_else(|| PyValueError::new_err("LogGroup missing 'LogTags' field"))?;
-    let log_tags_list = log_tags_obj
-        .cast::<PyList>()
-        .map_err(|_| PyTypeError::new_err("LogTags must be a list"))?;
+    // Parse LogTags - if not present, default to empty list
+    let log_tags = if let Ok(Some(log_tags_obj)) = log_group_dict.get_item("LogTags") {
+        let log_tags_list = log_tags_obj
+            .cast::<PyList>()
+            .map_err(|_| PyTypeError::new_err("LogTags must be a list"))?;
 
-    let mut log_tags = Vec::with_capacity(log_tags_list.len());
-    for tag_item in log_tags_list.iter() {
-        log_tags.push(parse_log_tag(&tag_item)?);
-    }
+        let mut log_tags = Vec::with_capacity(log_tags_list.len());
+        for tag_item in log_tags_list.iter() {
+            log_tags.push(parse_log_tag(&tag_item)?);
+        }
+        log_tags
+    } else {
+        Vec::new()
+    };
 
     let topic = if let Ok(Some(topic_obj)) = log_group_dict.get_item("Topic") {
         extract_optional_string(&topic_obj, "Topic")?.map(Cow::Owned)
@@ -326,14 +330,14 @@ where
 /// Serialize a LogGroup Python dict to protobuf bytes.
 ///
 /// Args:
-///     log_group_dict: A dict containing LogItems, LogTags, Topic, and Source.
+///     log_group_dict: A dict that may contain LogItems, LogTags, Topic, and Source.
 ///
 /// Returns:
 ///     bytes: The serialized protobuf data.
 ///
 /// Raises:
 ///     TypeError: If the input types are incorrect.
-///     ValueError: If required fields are missing.
+///     ValueError: If required fields within Log entries are missing.
 #[pyfunction]
 fn serialize_log_group(
     py: Python<'_>,
@@ -345,14 +349,14 @@ fn serialize_log_group(
 /// Serialize a LogGroupRaw Python dict to protobuf bytes.
 ///
 /// Args:
-///     log_group_dict: A dict containing LogItems, LogTags, Topic, and Source.
+///     log_group_dict: A dict that may contain LogItems, LogTags, Topic, and Source.
 ///
 /// Returns:
 ///     bytes: The serialized protobuf data.
 ///
 /// Raises:
 ///     TypeError: If the input types are incorrect.
-///     ValueError: If required fields are missing.
+///     ValueError: If required fields within Log entries are missing.
 #[pyfunction]
 fn serialize_log_group_raw(
     py: Python<'_>,
