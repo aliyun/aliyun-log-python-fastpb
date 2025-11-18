@@ -36,6 +36,7 @@ def test_many_logs():
     assert pb_log_group.logs[0].time == 1000
     assert pb_log_group.logs[-1].time == 1000 + num_logs - 1
 
+
 def test_many_contents_per_log():
     """Test Log with many content entries."""
     num_contents = 100
@@ -59,6 +60,7 @@ def test_many_contents_per_log():
 
     assert len(pb_log_group.logs[0].contents) == num_contents
 
+
 def test_many_tags():
     """Test LogGroup with many tags."""
     num_tags = 100
@@ -74,6 +76,7 @@ def test_many_tags():
     pb_log_group.ParseFromString(rust_bytes)
 
     assert len(pb_log_group.log_tags) == num_tags
+
 
 def test_long_strings():
     """Test with very long string values."""
@@ -99,6 +102,7 @@ def test_long_strings():
     assert pb_log_group.logs[0].contents[0].value == long_string
     assert pb_log_group.topic == long_string
     assert pb_log_group.source == long_string
+
 
 def test_realistic_scenario():
     """Test realistic logging scenario with 1000 logs."""
