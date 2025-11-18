@@ -1,6 +1,6 @@
 # aliyun-log-fastpb
 
-[![Test](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml/badge.svg)](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml)
+[![Test](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml/badge.svg)](https://github.com/aliyun/aliyun-log-python-fastpb/actions/workflows/test.yml) [![PyPI - Version](https://img.shields.io/pypi/v/aliyun-log-fastpb)](https://pypi.python.org/pypi/aliyun-log-fastpb) [![versions](https://img.shields.io/pypi/pyversions/aliyun-log-fastpb.svg)](https://github.com/aliyun/aliyun-log-python-fastpb) [![PyPI - License](https://img.shields.io/pypi/l/aliyun-log-fastpb)](https://github.com/aliyun/aliyun-log-python-fastpb/blob/main/LICENSE)
 
 [English](README.md) | 中文文档
 
