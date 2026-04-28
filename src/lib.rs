@@ -1,6 +1,7 @@
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyDict, PyList};
+use pyo3::intern;
 
 use quick_protobuf::{BytesReader, MessageRead, MessageWrite, Writer};
 use std::borrow::Cow;
@@ -337,51 +338,62 @@ fn deserialize_log_group_list(py: Python<'_>, data: &Bound<'_, PyBytes>) -> PyRe
     let result = PyDict::new(py);
     let groups_list = PyList::empty(py);
 
+    let key_key = intern!(py, "Key");
+    let key_value = intern!(py, "Value");
+    let key_time = intern!(py, "Time");
+    let key_time_ns = intern!(py, "TimeNs");
+    let key_contents = intern!(py, "Contents");
+    let key_topic = intern!(py, "Topic");
+    let key_source = intern!(py, "Source");
+    let key_log_tags = intern!(py, "LogTags");
+    let key_log_items = intern!(py, "LogItems");
+    let key_log_group_list = intern!(py, "logGroupList");
+
     for lg in &log_group_list.log_groups {
         let group_dict = PyDict::new(py);
 
         if let Some(ref topic) = lg.topic {
-            group_dict.set_item("Topic", topic.as_ref())?;
+            group_dict.set_item(key_topic, topic.as_ref())?;
         }
         if let Some(ref source) = lg.source {
-            group_dict.set_item("Source", source.as_ref())?;
+            group_dict.set_item(key_source, source.as_ref())?;
         }
 
         if !lg.log_tags.is_empty() {
             let tags_list = PyList::empty(py);
             for tag in &lg.log_tags {
                 let tag_dict = PyDict::new(py);
-                tag_dict.set_item("Key", tag.key.as_ref())?;
-                tag_dict.set_item("Value", tag.value.as_ref())?;
+                tag_dict.set_item(key_key, tag.key.as_ref())?;
+                tag_dict.set_item(key_value, tag.value.as_ref())?;
                 tags_list.append(tag_dict)?;
             }
-            group_dict.set_item("LogTags", tags_list)?;
+            group_dict.set_item(key_log_tags, tags_list)?;
         }
 
         let items_list = PyList::empty(py);
         for log in &lg.logs {
             let item_dict = PyDict::new(py);
-            item_dict.set_item("Time", log.time)?;
+            item_dict.set_item(key_time, log.time)?;
             if let Some(time_ns) = log.time_ns {
-                item_dict.set_item("TimeNs", time_ns)?;
+                item_dict.set_item(key_time_ns, time_ns)?;
             }
 
             let contents_list = PyList::empty(py);
             for content in &log.contents {
                 let content_dict = PyDict::new(py);
-                content_dict.set_item("Key", content.key.as_ref())?;
-                content_dict.set_item("Value", content.value.as_ref())?;
+                content_dict.set_item(key_key, content.key.as_ref())?;
+                content_dict.set_item(key_value, content.value.as_ref())?;
                 contents_list.append(content_dict)?;
             }
-            item_dict.set_item("Contents", contents_list)?;
+            item_dict.set_item(key_contents, contents_list)?;
             items_list.append(item_dict)?;
         }
-        group_dict.set_item("LogItems", items_list)?;
+        group_dict.set_item(key_log_items, items_list)?;
 
         groups_list.append(group_dict)?;
     }
 
-    result.set_item("logGroupList", groups_list)?;
+    result.set_item(key_log_group_list, groups_list)?;
     Ok(result.into())
 }
 
