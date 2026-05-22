@@ -4,7 +4,23 @@ Type stubs for aliyun-log-fastpb
 Fast protobuf serialization for Aliyun Log using PyO3 and quick-protobuf.
 """
 
-from typing import Any, Dict, List, Optional, TypedDict, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
+
+# A compact log entry: (time, [(key, value), ...]) or (time, time_ns, [(key, value), ...]).
+# Lists are accepted in place of tuples at every level.
+_KvPairStr = Union[Tuple[str, str], List[str]]
+_KvPairBytes = Union[Tuple[str, bytes], List[Union[str, bytes]]]
+_LogCompactStr = Union[
+    Tuple[int, Sequence[_KvPairStr]],
+    Tuple[int, int, Sequence[_KvPairStr]],
+    List[Any],
+]
+_LogCompactBytes = Union[
+    Tuple[int, Sequence[_KvPairBytes]],
+    Tuple[int, int, Sequence[_KvPairBytes]],
+    List[Any],
+]
+_LogTagCompact = Union[Tuple[str, str], List[str]]
 
 def serialize_log_group(log_group_dict: dict) -> bytes:
     """
@@ -75,5 +91,53 @@ def serialize_log_group_raw(log_group_dict: dict) -> bytes:
         ...     "Source": ""
         ... }
         >>> data = serialize_log_group_raw(log_group)
+    """
+    ...
+
+
+def serialize_log_group_compact(
+    log_items: Sequence[_LogCompactStr],
+    topic: Optional[str] = None,
+    source: Optional[str] = None,
+    log_tags: Optional[Sequence[_LogTagCompact]] = None,
+) -> bytes:
+    """
+    Serialize a LogGroup using a compact tuple/list layout.
+
+    Wire format is byte-identical to ``serialize_log_group``. The compact API
+    skips per-content dict allocation and PyDict hashing on the Python side,
+    making it ~2x faster for hot-path producers (e.g. logging handlers).
+
+    Args:
+        log_items: Sequence of ``(time, contents)`` or ``(time, time_ns, contents)``.
+            Each ``contents`` is a sequence of ``(key, value)`` pairs.
+            Tuples and lists are interchangeable at every level.
+        topic: Optional topic string. None or empty omits the field.
+        source: Optional source string. None or empty omits the field.
+        log_tags: Optional sequence of ``(key, value)`` tag pairs.
+
+    Returns:
+        bytes: The serialized protobuf data.
+
+    Example:
+        >>> body = serialize_log_group_compact(
+        ...     [(1700000000, [("level", "INFO"), ("message", "Hello")])],
+        ...     topic="t", source="s",
+        ...     log_tags=[("host", "h1")],
+        ... )
+    """
+    ...
+
+
+def serialize_log_group_raw_compact(
+    log_items: Sequence[_LogCompactBytes],
+    topic: Optional[str] = None,
+    source: Optional[str] = None,
+    log_tags: Optional[Sequence[_LogTagCompact]] = None,
+) -> bytes:
+    """
+    Compact variant of ``serialize_log_group_raw`` — accepts ``bytes`` values
+    instead of strings for binary log payloads. Same compact layout as
+    ``serialize_log_group_compact``; output is byte-identical to the dict API.
     """
     ...
